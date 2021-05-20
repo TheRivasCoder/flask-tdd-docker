@@ -1,8 +1,19 @@
 # src/tests/test_users.py
 
-
+from src import db
+from src.api.models import User
 import json
 
+def test_single_user(test_app, test_database):
+    user = User(username='jeffrey', email='jeffrey@testdriven.io')
+    db.session.add(user)
+    db.session.commit()
+    client = test_app.test_client()
+    resp = client.get(f'/users/{user.id}')
+    data = json.loads(resp.data.decode())
+    assert resp.status_code == 200
+    assert 'jeffrey' in data['username']
+    assert 'jeffrey@testdriven.io' in data['email']
 
 def test_add_user(test_app, test_database):
     client = test_app.test_client()
