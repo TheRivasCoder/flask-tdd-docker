@@ -19,11 +19,15 @@ user = api.model('User', {
     'created_date': fields.DateTime,
 })
 
+
 class Users(Resource):
 
     @api.marshal_with(user)
     def get(self, user_id):
-        return User.query.filter_by(id=user_id).first(), 200
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            api.abort(404, f"User {user_id} does not exist")
+        return user, 200
 
 class UsersList(Resource):
 
@@ -44,6 +48,10 @@ class UsersList(Resource):
 
         response_object['message'] = f'{email} was added!'
         return response_object, 201
+    
+    @api.marshal_with(user, as_list=True)
+    def get(self):
+        return User.query.all(), 200
 
 
 api.add_resource(UsersList, '/users')
